@@ -2,7 +2,11 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
@@ -15,7 +19,7 @@ public class APITests {
 
     @BeforeEach
     public void setup() {
-        RestAssured.baseURI = "https://petstore.swagger.io/v2/";
+      RestAssured.baseURI = "https://petstore.swagger.io/v2/";
     }
 
     @Test
@@ -50,5 +54,29 @@ public class APITests {
                 .statusLine("HTTP/1.1 404 Not Found")
                 .body("message", equalTo("Pet not found"))
                 .body("type", equalTo("error"));
+    }
+
+    @Test
+    public void newPetTest() {
+        Integer id = 11;
+        String name = "dogg";
+        String status = "sold";
+
+        Map<String, String> request = new HashMap<>();
+        request.put("id", id.toString());
+        request.put("name", name);
+        request.put("status", status);
+
+       given().contentType("application/json")
+                .body(request)
+                .when()
+                .post(baseURI + "pet/")
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(200)
+                .body("id", equalTo(id))
+                .body("name", equalTo(name))
+                .body("status", equalTo(status));
     }
 }
